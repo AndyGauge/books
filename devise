@@ -1,0 +1,945 @@
+Devise – Authentication 
+Solution for Ruby on Rails
+It was around 2 months ago that I started to dig deep into Ruby on Rails, when I 
+needed a plugin to handle authentication. That time, Ruby on Rails 3 was newly 
+published, when so many gems still hadn't updated their compatibility to Rails 
+update, including Authlogic. Authlogic was the first authentication gem that I used 
+as an authentication plugin, but I couldn't use it anymore since I had to use Rails 3 in 
+my project. That moment brought me to Devise. Devise was already compatible to 
+Rails 3 and so my research began. The research concluded:
+• Devise was very easy to use. The modules were developed in a very 
+good structure.
+• Devise provided 11 modules that I could use to authenticate my application.
+• Devise allowed me to customize some of its modules to meet my 
+application requirement.
+These are the reasons that strongly influenced me to develop an application with 
+Devise. It saved my time from developing new authentication modules from 
+scratch. Now, we have reached Ruby on Rails 4; Devise was quickly updated 
+so that developers could use it within the new Rails environment.
+Devise modules
+What makes Devise truly interesting is its modularity. The following modules are 
+provided by Devise:
+• Database Authenticatable: This module will encrypt and store a password 
+in the database to validate the authenticity of a user while signing in. The 
+authentication can be done both through POST requests or HTTP Basic 
+Authentication. This is the basic module to perform authentication 
+with Devise.
+www.it-ebooks.infoDevise – Authentication Solution for Ruby on Rails
+[ 8 ]
+• Token Authenticatable: This module enables users to sign in based on an 
+authentication token. The token can be given through query strings or HTTP 
+Basic Authentication.
+• Omniauthable: Attach OmniAuth support to Devise. By turning this 
+module on, your application will allow the user to sign in with external 
+accounts such as Facebook and Twitter. We will talk about this in more 
+detail in Chapter 3, Privileges.
+• Confirmable: Attach this module to enable the confirmation mechanism. 
+So, Devise will send an e-mail with a confirmation instruction and verify 
+whether an account is already confirmed during the sign-in process.
+• Recoverable: There are times when users forget their passwords and need 
+to recover it. This module is the answer for that need. Devise will allow the 
+user to reset passwords and it will send the user the instructions via e-mail.
+• Registerable: You can control whether or not your application provides the 
+registration mechanism by using this module. This module is also used to 
+allow users to edit and destroy their accounts.
+• Rememberable: It's very often, when you visit a login page of a website, 
+you will see a sentence, Remember Me, with a checkbox beside it. It will be 
+used to remember the logged-in user by storing a cookie. In Devise, you can 
+implement this method by attaching this module.
+• Trackable: For certain websites, the sign-in tracker is very useful. The data 
+can be very helpful to retrieve some information. If you choose Devise to 
+handle your authorization mechanisms, you will be able to do it. Devise 
+provides this module to track sign-in processes, so a user can collect 
+information regarding sign-in count, timestamps, and the IP address.
+• Timeoutable: This module is used to limit the session, so it will expire in a 
+specified period of time if it has no activity.
+• Validatable: This module provides the basic validation for e-mail and 
+password. The validations can be customized, so you're able to define 
+your own validations.
+• Lockable: If you are willing to add more security to your application, this 
+module could be very handy. Lockable will manage the maximum count 
+of failed sign-in attempts. When it reaches the maximum number, Devise 
+will lock the account. The user can unlock it via e-mail or after a specified 
+time period.
+These 11 modules are the essence of Devise. With these modules, you can do anything 
+related to application authorization, which is very useful in modern applications.
+www.it-ebooks.infoChapter 1
+[ 9 ]
+Installation
+We are going to learn how to install this interesting authorization plugin to your 
+Rails application. For your information, this is the specification of application 
+sample that I used:
+• Rails 4 (4.0.0)
+• Devise 3 (3.0.3)
+• SQLite 3 (1.3.8)
+Let's create our Rails application by executing this command:
+$ rails new learning-devise
+The first thing that should be done is you need to add the Devise gem to your Gemfile.
+gem 'devise'
+To make sure that everything is installed properly, you can execute the following 
+command inside your Rails application folder:
+$ bundle install
+The command will install the Devise gem, and now you have to install the 
+configuration files for Devise. You can install it all at once by executing the 
+following command:
+$ rails generate devise:install
+The result of the command is shown in the following screenshot:
+Devise installation
+www.it-ebooks.infoDevise – Authentication Solution for Ruby on Rails
+[ 10 ]
+As you can see from the screenshot, Devise generates two new files in your Rails 
+application. Those two files are:
+• devise.rb: This file is located at config/initializers/devise.rb and will 
+be used as the Devise main configuration file.
+• devise.en.yml: This file is located at config/locales/devise.en.yml and 
+it will be used as an internationalization file for English language.
+Not just generating files, the installation command also prints some information that 
+will be useful for our complete Devise setup. This information will tell us about:
+• The basic URL configuration that applies to every environment setting. The 
+code shown in the screenshot should be added to the environment settings, 
+so that Devise will acknowledge the application URL which is used in its 
+autogenerated e-mail. Especially for production, the host value should be 
+filled with your actual application domain.
+• The route setting that you need to add to your config/routes.rb file. By 
+defining your root URL, Devise will use it for its redirection. For example, 
+Devise will redirect the user to the root URL after they sign out from 
+the application.
+• Devise helpers that can be used to generate errors or warning messages when 
+there's something wrong with the code. This is very useful and you can write 
+it in your views file.
+• Configuration that you need to add when deploying to Heroku. I'm not 
+going to discuss about it in this book.
+• How to generate copies of Devise views, so that you can customize it 
+later. We will see how it works in Chapter 2, Authenticating Your Application 
+with Devise.
+The next step is generating a Devise model. Let's name our Devise model as user. For 
+your information, this model name can be replaced with any name you wish. This 
+name also determines the Devise helper's name. We will see how we use it later in 
+this chapter. To generate the Devise model, you can execute the following command:
+$ rails generate devise user
+www.it-ebooks.infoChapter 1
+[ 11 ]
+The result of this command can be seen in the following screenshot:
+Generate Devise model
+Based on the previous screenshot, Devise generates four kinds of files:
+• The first kind is used as a migration file. This file is shown as db/
+migrate/20130915133401_devise_create_users.rb. Like the other 
+migration files, it is used to generate tables in our database.
+• A model file that is shown as app/models/user.rb.
+• A test file that is shown as test/models/user_test.rb. This file is used to 
+perform testing. We will discuss this topic in Chapter 5, Testing Devise.
+• A fixture file that is shown as test/fixtures/users.yml. This file is used 
+to perform testing. We will discuss this topic in Chapter 5, Testing Devise.
+The command also modifies the model file to attach the default modules and the 
+route file (routes.rb). Devise modifies the route so the application recognizes 
+some routes generated by Devise. This is the code which is added by Devise to 
+the route file:
+devise_for :users
+Now, let's open a user model file (user.rb) and you're going to see this code:
+class User < ActiveRecord::Base
+# Include default devise modules. Others available 
+# are:
+# :token_authenticatable, :encryptable, 
+# :confirmable, :lockable, :timeoutable and 
+# :omniauthable
+devise :database_authenticatable, :registerable,
+:recoverable, :rememberable, :trackable, 
+:validatable
+end
+www.it-ebooks.infoDevise – Authentication Solution for Ruby on Rails
+[ 12 ]
+From the code, we will know that Devise will attach some default modules such as 
+Database Authenticable, Registerable, Recoverable, Rememberable, Trackable, and 
+Validatable. As I wrote earlier in this chapter, I suppose you already knew what the 
+modules are for.
+At this point, you have prepared all the basic settings that a Rails application needs 
+to implement Devise. So, the next step is creating the table on your database by 
+migrating the migration file. If you don't make any change to the Devise migration 
+file, it means Devise will only generate columns for its default modules. But, if you 
+make some changes like commenting on other modules such as t.encryptable, 
+t.confirmable, t.lockable, and t.tocken_authenticatble, you will have extra 
+columns in your user's table that will handle some specific Devise modules. So, it 
+depends on your requirement whether you are going to use the modules or not.
+We have prepared our migration file, now let's create the table. I presume that 
+you already have the database and have prepared the database configuration at 
+config/database.yml. If so, all you need to do is execute this command:
+$ rake db:migrate
+Now, you have prepared everything to make Devise run smoothly on your Rails 
+application. But, there's one more thing that I want to show you. It's about how to 
+wrap controllers with your authorization and see it in action.
+Run your first application with Devise
+In this section, we are going to talk about how to wrap your controllers with Devise 
+authorization and use some Devise helper in your views. First, I want to generate a 
+single controller by executing this command:
+$ rails generate controller home index
+This command will generate the controller (home_controller.rb) with an action 
+named index. It also generates a view file located at views/home/index.html.erb. 
+Let's start by opening the controller file and add a code (:authenticate_user!) 
+between class definition and first action definition. Why :authenticate_user!? As 
+I stated before, we have our Devise model named as user and this code is one of the 
+Devise helpers that I meant. So, in the future, when you have a Devise model with 
+a different name, you can change the user part in the code with your actual model 
+name. According to our example, the controller code will be like the following:
+class HomeController < ApplicationController
+before_filter :authenticate_user!
+www.it-ebooks.infoChapter 1
+[ 13 ]
+def index
+end
+end
+By adding the highlighted code, your Rails application will run the controller filter, 
+which is executed before executing all the actions defined in the controller. You can 
+also modify the filter so that it will be executed only for all actions using :only or 
+:except code. By adding this code, you will be able to define which actions should 
+be authorized and which should not. For example, it will be like the following code:
+class HomeController < ApplicationController
+ before_filter :authenticate_user!, :only => [:index, :new]
+ def index
+ end
+ def new
+ end
+ def edit
+ end 
+end
+The code shows that the actions index and new are authorized, so users need to sign 
+in before getting into the action page.
+Now, let's start our Rails server by executing the command $ rails server. See it 
+in action by visiting http://localhost:3000. The application will automatically 
+redirect you to the sign-in page, like this:
+First Devise application
+www.it-ebooks.infoDevise – Authentication Solution for Ruby on Rails
+[ 14 ]
+Now, you have run your first application with Devise. With current modules, you 
+can only perform sign-in, sign-up, reset password, remember me action, and sign-in 
+tracker. We will play with other modules in the next chapters, but before that, I want 
+to show some Devise's helpers, which are very helpful in view files. Those helpers 
+are as follows:
+• current_user: This helper will be very useful to get the data model of a 
+currently logged-in user. With this method, you are able to retrieve data 
+stored in the database anytime you want it. For example, if I want to get the 
+e-mail of the current logged-in user, I can retrieve it by calling the method 
+current_user.email.
+• user_signed_in?: This helper returns a Boolean data type, which 
+determines whether a user is logged-in or not. For example, with this method 
+you can hide and show sign-out link in your view. Here is the sample code 
+for this case (app/views/home/index.html.erb):
+<h1>Home#index</h1>
+<p>Find me in app/views/home/index.html.erb</p>
+<br>
+<% if user_signed_in? %>
+ <%= link_to 'Sign Out', destroy_user_session_path, method: 
+:delete %>
+<% end %>
+• user_session: This is a session variable that can set anything you want in 
+a hash format. Actually, this helper contains the subset of the Ruby on Rails 
+session data. So, the purpose of this helper is to simplify the use of Rails 
+sessions. Despite using the session variable for every Devise model that 
+you have, you can utilize the session helper, so the session grouping for your 
+model will be clear. For example, I want to save a string inside the session 
+helper, I can do it by writing this code:
+user_session[:hello] = "world"
+These helpers are the ones that I mentioned before. The actual name is based on your 
+Devise model name. So, when you create or use another model name, you can use all 
+these helpers by replacing the user keyword in the helpers name with the one that 
+you have.
+Summary
+At this point, you've known how to set up Devise at your Rails application, saw it in 
+action, and the helpers from Devise. We're going to dig deeper into Devise and I'm 
+sure, if you've understood all of this, the following chapters will be easier for you.
+www.it-ebooks.infoAuthenticating Your 
+Application with Devise
+A "state of the art" application sometimes requires more customizations from Devise, 
+such as customization for signing in, updating accounts, resetting a user's password, 
+or account confirmation. When you first install Devise with its default settings, you 
+will not get these features. That's why you will need to dig deeper to have a more 
+comprehensive understanding about Devise.
+Signing in using authentication other 
+than e-mails
+By default, Devise only allows e-mails to be used for authentication. For some 
+people, this condition will lead to the question, "What if I want to use some other 
+field besides e-mail? Does Devise allow that?" The answer is yes; Devise allows other 
+attributes to be used to perform the sign-in process.
+For example, I will use username as a replacement for e-mail, and you can change it 
+later with whatever you like, including userlogin, adminlogin, and so on. We are 
+going to start by modifying our user model. Create a migration file by executing the 
+following command inside your project folder:
+$ rails generate migration add_username_to_users username:string
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 16 ]
+This command will produce a file, which is depicted by the following screenshot:
+The generated migration file
+Execute the migrate (rake db:migrate) command to alter your users table, and 
+it will add a new column named username. You need to open the Devise's main 
+configuration file at config/initializers/devise.rb and modify the code:
+config.authentication_keys = [:username]
+config.case_insensitive_keys = [:username]
+config.strip_whitespace_keys = [:username]
+You have done enough modification to your Devise configuration, and now you have 
+to modify the Devise views to add a username field to your sign-in and sign-up pages. 
+By default, Devise loads its views from its gemset code. The only way to modify the 
+Devise views is to generate copies of its views. This action will automatically override 
+its default views. To do this, you can execute the following command:
+$ rails generate devise:views
+It will generate some files, which are shown in the following screenshot:
+Devise views files
+www.it-ebooks.infoChapter 2
+[ 17 ]
+As I have previously mentioned, these files can be used to customize another view. 
+But we are going to talk about it a little later in this chapter. Now, you have the 
+views and you can modify some files to insert the username field. These files are 
+listed as follows:
+• app/views/devise/sessions/new.html.erb: This is a view file for the 
+sign-up page. Basically, all you need to do is change the email field into 
+the username field.
+#app/views/devise/sessions/new.html.erb
+<h2>Sign in</h2>
+<%= notice %>
+<%= alert %>
+<%= form_for(resource, :as => resource_name, :url => session_
+path(resource_name)) do |f| %>
+<div><%= f.label :username %><br />
+<%= f.text_field :username, :autofocus => true %><div>
+<div><%= f.label :password %><br />
+<%= f.password_field :password %></div>
+<% if devise_mapping.rememberable? -%>
+<div><%= f.check_box :remember_me %> <%= f.label :remember_me %></
+div>
+<% end -%>
+<div><%= f.submit "Sign in" %></div>
+<% end %>
+%= render "devise/shared/links" %>
+You are now allowed to sign in with your username. The modification will 
+be shown, as depicted in the following screenshot:
+The sign-in page with username
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 18 ]
+• app/views/devise/registrations/new.html.erb: This file is a view file 
+for the registration page. It is a bit different from the sign-up page; in this file, 
+you need to add the username field, so that the user can fill in their username 
+when they perform the registration.
+#app/views/devise/registrations/new.html.erb
+<h2>Sign Up</h2>
+<%= form_for() do |f| %>
+<%= devise_error_messages! %>
+<div><%= f.label :email %><br />
+<%= f.email_field :email, :autofocus => true %></div>
+<div><%= f.label :username %><br />
+<%= f.text_field :username %></div>
+<div><%= f.label :password %><br />
+<%= f.password_field :password %></div>
+<div><%= f.label :password_confirmation %><br />
+<%= f.password_field :password_confirmation %></div>
+<div><%= f.submit "Sign up" %></div>
+<% end %>
+<%= render "devise/shared/links" %>
+Especially for registration, you need to perform extra modifications. 
+Previously, in Chapter 1, Devise – Authentication Solution for Ruby on Rails, we 
+have talked about mass assignment rules written in the app/controller/
+application_controller.rb file, and now, we are going to modify them 
+a little. Add username to the sanitizer for sign-in and sign-up, and you will 
+have something as follows:
+#these codes are written inside configure_permitted_parameters 
+function
+devise_parameter_sanitizer.for(:sign_in) {|u| u.permit(:email, 
+:username)}
+devise_parameter_sanitizer.for(:sign_up) {|u|
+u.permit(:email, :username, :password, :password_confirmation)}
+www.it-ebooks.infoChapter 2
+[ 19 ]
+These changes will allow you to perform a sign-up along with the 
+username data. The result of the preceding example is shown in the 
+following screenshot:
+The sign-up page with username
+I want to add a new case for your sign-in, which is only one field for username 
+and e-mail. This means that you can sign in either with your e-mail ID or username 
+like in Twitter's sign-in form. Based on what we have done before, you already have 
+username and email columns; now, open /app/models/user.rb and add 
+the following line:
+attr_accessor :signin
+Next, you need to change the authentication keys for Devise. Open /config/
+initializers/devise.rb and change the value for config.authentication_keys, 
+as shown in the following code snippet:
+config.authentication_keys = [ :signin ] 
+Let's go back to our user model. You have to override the lookup function that 
+Devise uses when performing a sign-in. To do this, add the following method inside 
+your model class:
+def self.find_first_by_auth_conditions(warden_conditions)
+ conditions = warden_conditions.dup
+ where(conditions).where(["lower(username) = :value OR lower(email) 
+= :value", { :value => signin.downcase }]).first
+end
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 20 ]
+As an addition, you can add a validation for your username, so it will be case 
+insensitive. Add the following validation code into your user model:
+validates :username, :uniqueness => {:case_sensitive => false}
+Please open /app/controller/application_controller.rb and make sure you 
+have this code to perform parameter filtering:
+before_filter :configure_permitted_parameters, if: :devise_controller?
+protected
+ def configure_permitted_parameters
+ devise_parameter_sanitizer.for(:sign_in) {|u| u.permit(:signin)}
+ devise_parameter_sanitizer.for(:sign_up) {|u| u.permit(:email, 
+:username, :password, :password_confirmation)}
+end
+We're almost there! Currently, I assume that you've already stored an account that 
+contains the e-mail ID and username. So, you just need to make a simple change in 
+your sign-in view file (/app/views/devise/sessions/new.html.erb). Make sure 
+that the file contains this code:
+<h2>Sign in</h2>
+<%= notice %>
+<%= alert %>
+<%= form_for(resource, :as => resource_name, :url => session_
+path(resource_name)) do |f| %>
+ <div><%= f.label "Username or Email" %><br />
+ <%= f.text_field :signin, :autofocus => true %></div>
+ <div><%= f.label :password %><br />
+ <%= f.password_field :password %></div>
+ <% if devise_mapping.rememberable? -%>
+ <div><%= f.check_box :remember_me %> <%= f.label :remember_me %></
+div>
+ <% end -%>
+ <div><%= f.submit "Sign in" %></div>
+<% end %>
+<%= render "devise/shared/links" %>
+You can see that you don't have a username or email field anymore. The field is now 
+replaced by a single field named :signin that will accept either the e-mail ID or the 
+username. It's efficient, isn't it?
+www.it-ebooks.infoChapter 2
+[ 21 ]
+Updating the user account
+Basically, you are already allowed to access your user account when you activate the 
+registerable module in the model. To access the page, you need to log in first and 
+then go to /users/edit. The page is as shown in the following screenshot:
+The edit account page
+But, what if you want to edit your username or e-mail ID? How will you do that? 
+What if you have extra information in your users table, such as addresses, birth 
+dates, bios, and passwords as well? How will you edit these? Let me show you 
+how to edit your user data including your password, or edit your user data without 
+editing your password.
+• Editing your data, including the password: To perform this action, the first 
+thing that you need to do is modify your view. Your view should contain 
+the following code:
+<div><%= f.label :username %><br />
+<%= f.text_field :username %></div>
+Now, we are going to overwrite Devise's logic. To do this, you have to create 
+a new controller named registrations_controller. Please use the rails 
+command to generate the controller, as shown:
+$ rails generate controller registrations update
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 22 ]
+It will produce a file located at app/controllers/. Open the file and make 
+sure you write this code within the controller class:
+class RegistrationsController < Devise::RegistrationsController
+ def update
+ new_params = params.require(:user).permit(:email, 
+ :username, :current_password, :password, 
+ :password_confirmation)
+ @user = User.find(current_user.id)
+ if @user.update_with_password(new_params)
+ set_flash_message :notice, :updated
+ sign_in @user, :bypass => true
+ redirect_to after_update_path_for(@user)
+ else
+ render "edit"
+ end
+ end
+end
+Let's look at the code. Currently, Rails 4 has a new method in organizing 
+whitelist attributes. Therefore, before performing mass assignment 
+attributes, you have to prepare your data. This is done in the first line 
+of the update method.
+Now, if you see the code, there's a method defined by Devise named 
+update_with_password. This method will use mass assignment attributes 
+with the provided data. Since we have prepared it before we used it, it will 
+be fine.
+Next, you have to edit your route file a bit. You should modify the rule 
+defined by Devise, so instead of using the original controller, Devise will use 
+the controller you created before. The modification should look as follows:
+devise_for :users, :controllers => {:registrations => 
+"registrations"}
+Downloading the example code
+You can download the example code files for all Packt books 
+you have purchased from your account at http://www.
+packtpub.com. If you purchased this book elsewhere, you can 
+visit http://www.packtpub.com/support and register to 
+have the files e-mailed directly to you.
+www.it-ebooks.infoChapter 2
+[ 23 ]
+Now you have modified the original user edit page, and it will be a little 
+different. You can turn on your Rails server and see it in action. The view is 
+as depicted in the following screenshot:
+The modified account edit page
+Now, try filling up these fields one by one. If you are filling them with 
+different values, you will be updating all the data (e-mail, username, and 
+password), and this sounds dangerous. You can modify the controller to 
+have better data update security, and it all depends on your application's 
+workflows and rules.
+• Editing your data, excluding the password: Actually, you already have what 
+it takes to update data without changing your password. All you need to do 
+is modify your registrations_controller.rb file. Your update function 
+should be as follows:
+class RegistrationsController < Devise::RegistrationsController
+ def update
+ new_params = params.require(:user).permit(:email, 
+ :username, :current_password, :password, 
+ :password_confirmation)
+ change_password = true
+ if params[:user][:password].blank?
+ params[:user].delete("password")
+ params[:user].delete("password_confirmation")
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 24 ]
+ new_params = params.require(:user).permit(:email, 
+ :username)
+ change_password = false
+ end
+ @user = User.find(current_user.id)
+ is_valid = false
+ if change_password
+ is_valid = @user.update_with_password(new_params)
+ else
+ @user.update_without_password(new_params)
+ end
+ if is_valid
+ set_flash_message :notice, :updated
+ sign_in @user, :bypass => true
+ redirect_to after_update_path_for(@user)
+ else
+ render "edit"
+ end
+ end
+end
+The main difference from the previous code is now you have an algorithm that will 
+check whether the user intends to update your data with their password or not. If 
+not, the code will call the update_without_password method. Now, you have codes 
+that allow you to edit with/without a password. Now, refresh your browser and try 
+editing with or without a password. It won't be a problem anymore.
+Signing up the user with confirmation
+Why does an application need to have an account confirmation? Actually, it's 
+because the application needs the e-mail to be real, so that it can be used for future 
+requirements. So, if one day you decide that you want to give a newsletter to your 
+users periodically, you can consider applying this method to your application.
+It's very simple to apply this method. You just need to activate the :confirmable 
+module and have access to a mail server. The access is used to send a confirmation 
+e-mail to the user, and for this example, I will show you how to use Gmail as your 
+mail server.
+www.it-ebooks.infoChapter 2
+[ 25 ]
+You need to define the connection settings in your application. Because we are in the 
+development environment, you can open the config/environments/development.
+rb file and add this code:
+config.action_mailer.delivery_method = :smtp
+config.action_mailer.perform_deliveries = true
+config.action_mailer.raise_delivery_errors = true
+config.action_mailer.smtp_settings = {
+ :address => "smtp.gmail.com",
+ :port => 587,
+ :domain => "gmail.com",
+ :user_name => <your_gmail_user_name>,
+ :password => <your_gmail_password>,
+ :authentication => 'plain',
+ :enable_starttls_auto => true
+}
+Next, modify your model file and add a module, so your model file will be as follows:
+class User < ActiveRecord::Base
+ devise :database_authenticatable, :registerable, :recoverable, 
+ :rememberable, :trackable, :validatable, :confirmable
+end
+It's almost done. Now, create a migration file and modify it so that the content will be 
+as follows:
+class AddConfirmableToUsers < ActiveRecord::Migration
+ def up
+ add_column :users, :unconfirmed_email, :string
+ add_column :users, :confirmation_token, :string
+ add_column :users, :confirmed_at, :string
+ add_column :users, :confirmation_sent_at, :datetime
+ add_index :users, :confirmation_token, :unique => true
+ User.update_all(:confirmed_at => Time.now) #your current data 
+will be treated as if they have confirmed their account
+ end
+ def down
+ remove_column :users, :unconfirmed_email, 
+ :confirmation_token, :confirmed_at, :confirmation_sent_at
+ end
+end
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 26 ]
+Execute the rake db:migrate command and your users table will be altered and 
+ready to carry out the confirmation mechanism.
+Now, run your Rails server and go to the registration page. Try registering a new 
+account and see how it goes. Your application will send you an e-mail containing a 
+link to confirm your account.
+Resetting your password
+"Oh my God! I forgot my password. How can I log in to the site?" It's very common 
+that people forget the passwords of certain applications, and it will be a disaster if 
+the application doesn't provide you with a feature to reset or create a new password. 
+Resetting passwords has become a very important feature, and Devise provides it in 
+an easy way.
+To activate this module, your model should have the recoverable module in its 
+Devise settings. Since this module requires a connection to an e-mail server, you 
+will also need to define the configuration in order to establish a connection to a mail 
+server. This can be done in the environment's configuration files as well. Fortunately, 
+we don't need to worry because we have already met the requirement. So, you 
+can directly go to your sign-in page and you will see a link labeled Forgot your 
+password?. Click on it, fill in the E-mail field, and reset the password. In a moment, 
+you will receive an e-mail sent by the Devise module. The e-mail will contain a link, 
+which will bring you to a page, as shown in the following screenshot:
+The change password page
+Now, you can fill in your new password and submit it. Once you've submitted your 
+new password, you'll be signed in again.
+www.it-ebooks.infoChapter 2
+[ 27 ]
+Canceling your account
+Previously, we learned about how to update an account, register an account with a 
+confirmation, and reset an account's password. Now, it's time for us to learn how to 
+cancel an account.
+This feature is provided to delete an account so that it won't be accessible anymore. 
+By default, Devise provides this feature, and it can be accessed through the user 
+edit page. As shown in the Edit User page, you can see a button labeled Cancel my 
+account. If you press this button, Devise will delete your data from the database. So, 
+if you want to access the application, you need to sign up again.
+For some websites, data is like a treasure. Many websites don't perform deletions 
+because they don't want to delete any data stored in their database. Instead of 
+deleting it physically, the application will only change the flag of a data. Let's say, I 
+have a user account that has a data flag, published. When I delete it, I don't delete 
+the data but I change the flag of the data to deleted. But now, the question is how 
+does Devise perform this method? Perform the following steps to know:
+1. Create a migration file that will add a new column in the users table named 
+is_active with the type, integer.
+2. Add a method named destroy in registration_controller.rb, so it will 
+contain the following code:
+def destroy
+ @user = User.find(current_user.id)
+ @user.is_active = 0
+ if @user.save
+ sign_out @user
+ redirect_to root_path
+ else
+ render "edit"
+ end
+end
+3. Now, reload the user edit page and click on the Cancel Account button. You 
+will be brought to the main page, but this time your data will not be deleted. 
+It's now flagged with zero (0).
+This is an example of many possibilities to be implemented as a replacement for data 
+deletion. So, it depends on what you want to develop in your application.
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 28 ]
+Customizing Devise actions and routes
+We have learned all the basic features that are commonly used in an application. 
+Some of them are minimally customized and some of them are used as is. Maybe 
+now is the time for you to wonder, "What if I want to customize Devise's actions, 
+so that I can inject extra codes to do anything I want?" So, let's step forward to 
+customize Devise's actions.
+Technically, to perform action customizations, we need to create a controller that 
+inherits Devise's controllers. It would be wise if you have a look at all of Devise's 
+controllers first before we start this part, as shown at https://github.com/
+plataformatec/devise/tree/master/app/controllers/devise. So, when you 
+start making some customizations, you will understand why you do it that way. 
+However, I'm not going to tell you about the best practices of these customizations; 
+I will only tell you the basics of performing the customizations. Therefore, what you 
+will see in these examples are the instructions about what code you need to prepare 
+and how you should access it.
+• Sign-up (registration): You can create a controller to override 
+registrations_controller.rb, which contains the following code:
+class RegistrationsController < Devise::RegistrationController
+ def new
+ # this action is used to show the sign in form
+ # you can add your custom code here
+ end
+ def create
+ # this action is triggered when the user sends data to sign up
+ # you can add your custom code here
+ end
+end
+These two new methods will take effect if you change your route for 
+Devise. Fortunately, we have modified the route file to comply with this 
+customization. This is the route rule that is currently prevalent for Devise.
+devise_for :users, :controllers => {:registrations => 
+"registrations"}
+Now, you have the access to modify the action to meet your needs. You can 
+write an extra process before or after the sign-up action. But, you need to 
+remember that you have to write some code that already existed in the parent 
+controller because without these codes your action won't work well. You can 
+see the parent file at https://github.com/plataformatec/devise/blob/
+master/app/controllers/devise/registrations_controller.rb.
+www.it-ebooks.infoChapter 2
+[ 29 ]
+• User edit: To customize this action, you can continue editing 
+registrations_controller.rb and adding these codes inside the class:
+def edit
+ # this action is used to show the user edit form page
+ # you can add your custom code here
+end
+def update
+ # this action is triggered when the user sends data to edit 
+their data
+ # you can add your custom code here
+end
+You don't need to make changes to your routes since you already made 
+changes when you customized the user sign-up (registration) action.
+• Confirmation: The first thing you need to do is create a controller file named 
+confirmations_controller.rb. This file can be created by executing the 
+following command:
+$ rails generate controller confirmations new create
+The content of this newly-created controller is as follows:
+class ConfirmationsController < Devise::ConfirmationsController
+ def new
+ # this action is used to show the confirmation form
+ # you can add your custom code here
+ end
+ def create
+ # this action is triggered when the user sends their 
+ confirmation token to confirm their account
+ # you can add your custom code here
+ end
+end
+To make Devise recognize that you have overridden its original class, you 
+also need to modify the routes for your Devise model. As an example, we 
+will use the user model. Combined with the registration customization, the 
+route will be as follows:
+devise_for :users, :controllers => {:registrations => 
+"registrations", :confirmations => "confirmations"}
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 30 ]
+• User deletion: To create a custom code for deleting a user, you also need to 
+modify registrations_controller.rb. Put this method within the class:
+def destroy
+ # this method is triggered when the user tries to delete a 
+user account
+end
+You don't need to modify your routes anymore because the requirement is 
+met when you customized the user sign-up (requirement) code.
+• Sign-in: Execute the following command to create a controller named 
+sessions_controller.rb:
+$ rails generate controller sessions new create
+The controller you just generated will contain this code:
+class SesssionsController < Devise::SessionsController
+ def new
+ # this method is used to show the sign in form
+ # you can add your custom code here
+ end
+ def create
+ # this method is triggered when the user sends data to sign in
+ # you can add your custom code here
+ end
+end
+To make Devise recognize your custom code, you have to modify your 
+Devise route a little. Combined with the previous customizations, the route 
+should be as follows:
+devise_for :users, :controllers => {:registrations => 
+"registrations", :confirmations => "confirmations", :sessions => 
+"sessions"}
+• Sign-out: To customize this action, you need to modify sessions_
+controller.rb, which you just created. Please put the following method 
+within the class:
+def destroy
+ # this method is triggered when the user sends data to sign out
+ # you can add your custom code here
+end
+You don't need to modify your routes since it has been done when you 
+performed your code customization in the sign-in action.
+www.it-ebooks.infoChapter 2
+[ 31 ]
+• Forgot password: Please create a new controller file named passwords_
+controller.rb. You can do this by executing the following command:
+$ rails generate controller passwords new create
+The controller will contain this code:
+class PasswordsController < Devise::PasswordsController
+ def new
+ # this method will show a forgot password form
+ # you can add your custom code here
+ end
+ def create
+ # this method is triggered when you submit to reset your 
+password
+ # you can add your custom code here
+ end
+end
+Now, to enable your code customization, you have to modify your routes. Combined 
+with the previous code customizations, your route should be like this:
+devise_for :users, :controllers => {:registrations => "registrations", 
+:confirmations => "confirmations", :sessions => "sessions", :passwords 
+=> "passwords"}
+Customizing your Devise layout
+There are times when you have more than one Devise model in one application, and 
+a question comes to your mind, such as "How do I maintain its views so that they 
+will have different views?" Previously, I wrote about generating views, so you can 
+make some custom changes to the views by executing the following command:
+$ rails generate devise:views
+Now, you are going to learn about how to generate scoped views in Devise. At first, 
+you need to make a little modification to config/initializers/devise.rb. You 
+need to remove the comment tag for this code:
+config.scoped_views = true
+This code will enable scoped views for Devise, so you can generate some specific 
+views for your Devise model.
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 32 ]
+Before we start generating views, let's have two new Devise models for admin and 
+employee as the examples. Now, you can generate scoped views for your Devise 
+model by executing this command:
+$ rails generate devise:views admins
+$ rails generate devise:views employees
+The following screenshot shows the generated Devise view files:
+Let me show you how it works by making a simple change to each view file; for 
+example, we are going to make changes in app/views/admins/sessions/new.
+html.erb and app/views/employees/sessions/new.html.erb. In my case, I put 
+words such as "admins" and "employees" in <h2> tags in each file, so we can expect 
+them to have different views when we open their sign-in form. I assume that you 
+have the admins and employees controllers that define the index action. The action 
+is authorized by admin and employee. Now, try starting the Rails server and go 
+through http://localhost:3000/employees/index.http://localhost:3000/
+employees/index.
+www.it-ebooks.infoChapter 2
+[ 33 ]
+The sign-in form for an employee
+You have seen the scoped image for an employee sign-in form; now you need to 
+go through http://localhost:3000/admins/indexhttp://localhost:3000/
+admins/index and you will see the scoped view for an admin:
+The sign-in form for an admin
+You have successfully created different views for your Devise model, but you still 
+have only one layout. So, how will you apply different layouts to different Devise 
+models? Don't worry, it's actually easy to do that. Please open app/controllers/
+application_controller.rb and put this code within the class:
+layout :layout_by_resource
+protected
+ def layout_by_resource
+ if devise_controller?
+ if resource_name == :admin
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 34 ]
+ "devise_admin_application" #admin model will use this layout
+ elsif resource_name == :employee
+ "devise_employee_application" #employee model will use this 
+layout
+ else
+ "devise_application" #other devise model will use this 
+layout
+ end
+ else
+ "application" #default rails application layout
+ end
+end
+Now, you need to create three new files under app/view/layouts named 
+devise_admin_application.html.erb, devise_employee_application.html.
+erb, and devise_application.html.erb. Put anything you like as a mark to 
+denote that you are in a different layout. If you go through the employee page, you 
+will see a view, as shown in the following screenshot:
+Specific layout for an employee
+www.it-ebooks.infoChapter 2
+[ 35 ]
+Now, try accessing the sign-in page for the admin model. You will find it different 
+based on the mark you put in the layout for admin. In my case, the view is as shown 
+in the following screenshot:
+Specific layout for admin
+If you have more than two Devise models, the other one will also have a different 
+layout. In my case, I used a default layout, which is defined by devise_application.
+html.erb. The result is as shown in the following screenshot:
+The default layout for a Devise model
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 36 ]
+Integrating Devise with Mongoid
+This is an example of how you are able to implement Devise with one of the 
+NoSQL databases, such as MongoDB. To establish a connection, we are going to use 
+Mongoid as a driver. I'm going to show you two examples. The first example will 
+require a fresh Rails application where you need to generate a new Rails application, 
+and the second one will show you how to change the configuration from MySQL 
+to MongoDB. Note that these examples will use MongoDB Version 2.2.0 and I will 
+not tell you how to install MongoDB, but you can see the full documentation about 
+its installation at http://docs.mongodb.org/manual/installation/. As you can 
+see in the documentation, it also shows you how to turn on the server; therefore, I 
+assume you have done it before you proceed to the next step.
+Now, we can start from the first example by executing the Rails application 
+generation command without specifying the database type:
+$ rails new learning-devise-mongoid
+Next, you need to add two new gems inside Gemfile and after you have added 
+them, you can install them by executing bundle install:
+gem 'mongoid'
+gem 'devise'
+Now, you need to create a configuration file for Mongoid by executing the 
+following command:
+$ rails generate mongoid:config
+In my case, I don't need to change anything in my Mongoid configuration. But, if you 
+want to see the content of the configuration file or you need to change something in 
+it, you can open the file at config/mongoid.yml.
+Since we are no longer using active record, we need to modify the config/
+application.rb file and remove the line, require 'rails/all', while adding 
+this code:
+require 'action_controller/railtie'
+require 'action_mailer/railtie'
+require 'rails/test_unit/railtie'
+require 'sprockets/railtie'
+You also need to modify one of the files in config/environments; for this 
+example, we are going to modify development.rb because we are currently in the 
+development environment. Please remove or comment out this line of code:
+config.active_record.migration_error = :page_load
+www.it-ebooks.infoChapter 2
+[ 37 ]
+The configuration for Mongoid is done; now, we are going to move to the Devise 
+configuration. There is no difference in setting up Devise with Mongoid; the 
+commands and steps that you need to perform are exactly the same with the ones 
+that I've written in the previous chapter. But, there's one difference in the Devise 
+configuration file. If you open config/initializers/devise.rb, usually you are 
+going to see the require 'devise/orm/active_record' line inside it. But, if you 
+use Devise with Mongoid, you are going to see that the code will be replaced with 
+the following code:
+require 'devise/orm/mongoid'
+Let's say I generated a user Devise model and I also generated a users controller to 
+see whether it's working or not. My controller will be like this:
+class UsersController < ApplicationController
+ before_filter :authenticate_user!
+ def index
+ end
+end
+These will be the codes for my view:
+<h1>Users#index</h1>
+<p>Find me in app/views/users/index.html.erb</p>
+<%= link_to 'Sign Out', destroy_user_session_path, method: "delete" %>
+When you go through http://localhost:3000/users/indexhttp://
+localhost:3000/users/index, you are going to be redirected to the following page:
+The Devise sign-in form with Mongoid
+www.it-ebooks.infoAuthenticating Your Application with Devise
+[ 38 ]
+Your Devise is installed and ready to use. If you want to determine whether your 
+data is recorded or not in your MongoDB, you can try the commands shown in the 
+following screenshot:
+Commands in the Rails console to check MongoDB data
+What if you already have the Rails application installed with the mysql2 gem 
+and suddenly you decide to change your database to MongoDB? Don't worry. 
+You don't need to regenerate your Rails application from scratch. You just need to 
+follow the steps that I'm going to put before you. But, I assume that you are going 
+to start the application from a brand new database, so your existing user data 
+will be abandoned.
+First of all, you need to modify Gemfile by replacing the line, gem 'mysql2', 
+with gem 'mongoid', git: 'https://github.com/mongoid/mongoid.git'. 
+The next step is to modify config/application.rb so that the file will contain 
+the following code:
+#require 'rails/all' #you don't need this line anymore
+require "action_controller/railtie"
+require "action_mailer/railtie"
+require "rails/test_unit/railtie"
+require "sprockets/railtie"
+Now, you need to modify config/environments/development.rb by commenting 
+out the following line:
+#config.active_record.migration_error = :page_load
+These are the basic configurations that you need to perform before generating the 
+Mongoid configuration with this command:
+$ rails generate mongoid:config
+www.it-ebooks.infoChapter 2
+[ 39 ]
+Don't forget to open config/initializers/devise.rb and modify it as shown:
+#require 'devise/orm/active_record'
+require 'devise/orm/mongoid
+All set! Now, you can go to the authorized page and see the Devise sign-in form. 
+Don't forget that you don't have the previous data in MySQL in your MongoDB; 
+consequently, you need to re-register your user data.
+Summary
+Now, I believe that you will be able to make your own Rails application with Devise. 
+You should be able to make your own customizations based on your needs. You will 
+have a more comprehensive understanding about Devise modules and how you 
+should make your own customizations either in the logic flow or the view codes. Next, 
+we will learn how to implement privileges in Devise because in some circumstances, 
+privileges will be needed to prevent certain users from accessing some features. 
+Everything about privileges in Devise will be discussed in the next chapter.
+www.it-ebooks.infowww.it-ebooks.info
